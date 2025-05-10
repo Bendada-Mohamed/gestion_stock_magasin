@@ -63,7 +63,7 @@ $recent_movements = $stmt->fetchAll();
                         <span class="nav-link">Bienvenue, <?php echo htmlspecialchars($_SESSION['username']); ?></span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="auth/logout.php">Déconnexion</a>
+                        <button id="logoutBtn" class="nav-link btn btn-link">Déconnexion</button>
                     </li>
                 </ul>
             </div>
@@ -148,5 +148,22 @@ $recent_movements = $stmt->fetchAll();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            try {
+                const response = await AuthService.logout();
+                if (response.status) {
+                    // Redirect to login page on successful logout
+                    window.location.href = 'auth/login.php';
+                } else {
+                    alert('Erreur lors de la déconnexion: ' + response.message);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la déconnexion');
+            }
+        });
+    </script>
 </body>
-</html> 
+</html>

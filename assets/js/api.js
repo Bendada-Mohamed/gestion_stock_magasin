@@ -1,6 +1,40 @@
 // Configuration de l'API
 const API_URL = 'http://localhost/gestion_stock_magasin/api';
-
+// Service pour l'Authentification
+const AuthService = {
+    async connect(data) {
+        try {
+            const response = await fetch(`${API_URL}/auth/login.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Erreur reseau');
+            return await response.json();
+        } catch (error) {
+            console.error('Erreur lors de la Connexion:', error);
+            return { status: false, message: 'Erreur de connexion au serveur' };
+        }
+    },
+    
+    async logout() {
+        try {
+            const response = await fetch(`${API_URL}/auth/logout.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) throw new Error('Erreur réseau');
+            return await response.json();
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+            return { status: false, message: 'Erreur de déconnexion' };
+        }
+    }
+}
 // Service pour les produits
 const ProductService = {
     // Récupérer tous les produits avec filtres
@@ -105,4 +139,4 @@ ProductService.createProduct(newProduct)
     .catch(error => {
         console.error('Error:', error);
     });
-*/ 
+*/

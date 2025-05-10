@@ -8,36 +8,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Recherche et filtrage
-$search = $_GET['search'] ?? '';
-$category = $_GET['category'] ?? '';
-$sort = $_GET['sort'] ?? 'name';
-$order = $_GET['order'] ?? 'ASC';
-
-// Construction de la requête
-$query = "SELECT p.*, c.name as category_name 
-          FROM products p 
-          LEFT JOIN categories c ON p.category_id = c.id 
-          WHERE 1=1";
-$params = [];
-
-if (!empty($search)) {
-    $query .= " AND (p.name LIKE ? OR p.description LIKE ?)";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
-}
-
-if (!empty($category)) {
-    $query .= " AND p.category_id = ?";
-    $params[] = $category;
-}
-
-$query .= " ORDER BY $sort $order";
-
-$stmt = $conn->prepare($query);
-$stmt->execute($params);
-$products = $stmt->fetchAll();
-
 // Récupération des catégories pour le filtre
 $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetchAll();
 ?>
@@ -95,15 +65,15 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetchAll()
         <!-- Filtres et recherche -->
         <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" class="row g-3">
+                <form id="filterForm" class="row g-3">
                     <div class="col-md-4">
-                        <input type="text" class="form-control" name="search" placeholder="Rechercher..." value="<?php echo htmlspecialchars($search); ?>">
+                        <input type="text" class="form-control" name="search" placeholder="Rechercher...">
                     </div>
                     <div class="col-md-3">
                         <select class="form-select" name="category">
                             <option value="">Toutes les catégories</option>
                             <?php foreach ($categories as $cat): ?>
-                            <option value="<?php echo $cat['id']; ?>" <?php echo $category == $cat['id'] ? 'selected' : ''; ?>>
+                            <option value="<?php echo $cat['id']; ?>">
                                 <?php echo htmlspecialchars($cat['name']); ?>
                             </option>
                             <?php endforeach; ?>
@@ -111,9 +81,9 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetchAll()
                     </div>
                     <div class="col-md-3">
                         <select class="form-select" name="sort">
-                            <option value="name" <?php echo $sort === 'name' ? 'selected' : ''; ?>>Nom</option>
-                            <option value="price" <?php echo $sort === 'price' ? 'selected' : ''; ?>>Prix</option>
-                            <option value="quantity" <?php echo $sort === 'quantity' ? 'selected' : ''; ?>>Quantité</option>
+                            <option value="name">Nom</option>
+                            <option value="price">Prix</option>
+                            <option value="quantity">Quantité</option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -138,29 +108,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetchAll()
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php foreach ($products as $product): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($product['name']); ?></td>
-                                <td><?php echo htmlspecialchars($product['description']); ?></td>
-                                <td><?php echo htmlspecialchars($product['category_name'] ?? 'Non catégorisé'); ?></td>
-                                <td><?php echo number_format($product['price'], 2); ?> €</td>
-                                <td>
-                                    <span class="badge bg-<?php echo $product['quantity'] < 10 ? 'danger' : 'success'; ?>">
-                                        <?php echo $product['quantity']; ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="edit.php?id=<?php echo $product['id']; ?>" class="btn btn-sm btn-primary">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a href="delete.php?id=<?php echo $product['id']; ?>" class="btn btn-sm btn-danger" 
-                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
+                        <tbody id="productsTableBody">
                         </tbody>
                     </table>
                 </div>
@@ -168,6 +116,79 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetchAll()
         </div>
     </div>
 
+    <script src="../assets/js/api.js"></script>
+    <script>
+        // Charger les produits au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            setupFilterForm();
+        });
+
+        // Fonction pour charger les produits
+        async function loadProducts(filters = {}) {
+            try {
+                const response = await ProductService.getProducts(filters);
+                const products = response.data;
+                const tableBody = document.getElementById('productsTableBody');
+                tableBody.innerHTML = '';
+
+                products.forEach(product => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${product.name}</td>
+                        <td>${product.description}</td>
+                        <td>${product.category_name || 'Non catégorisé'}</td>
+                        <td>${parseFloat(product.price).toFixed(2)} €</td>
+                        <td>
+                            <span class="badge bg-${product.quantity < 10 ? 'danger' : 'success'}">
+                                ${product.quantity}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="edit.php?id=${product.id}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erreur lors du chargement des produits:', error);
+                alert('Erreur lors du chargement des produits');
+            }
+        }
+
+        // Configuration du formulaire de filtrage
+        function setupFilterForm() {
+            const form = document.getElementById('filterForm');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const filters = {};
+                for (let [key, value] of formData.entries()) {
+                    if (value) filters[key] = value;
+                }
+                await loadProducts(filters);
+            });
+        }
+
+        // Supprimer un produit
+        async function deleteProduct(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+                try {
+                    await ProductService.deleteProduct(id);
+                    alert('Produit supprimé avec succès');
+                    loadProducts();
+                } catch (error) {
+                    console.error('Erreur lors de la suppression du produit:', error);
+                    alert('Erreur lors de la suppression du produit');
+                }
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

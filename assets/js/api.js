@@ -1,5 +1,7 @@
 // Configuration de l'API
 const API_URL = 'http://localhost/gestion_stock_magasin/api';
+
+
 // Service pour l'Authentification
 const AuthService = {
     async connect(data) {
@@ -35,13 +37,22 @@ const AuthService = {
         }
     }
 }
+
+// Service pour les categories
+    // code ...
+
+
+// Service pour les mouvements
+    // code ...
+
+
 // Service pour les produits
 const ProductService = {
     // Récupérer tous les produits avec filtres
-    async getProducts(filters = {}) {
+    async getProducts(filters = {}) { 
         try {
             const queryParams = new URLSearchParams(filters).toString();
-            const response = await fetch(`${API_URL}/products/?${queryParams}`);
+            const response = await fetch(`${API_URL}/products/?${queryParams}`); // GET
             if (!response.ok) throw new Error('Erreur réseau');
             return await response.json();
         } catch (error) {

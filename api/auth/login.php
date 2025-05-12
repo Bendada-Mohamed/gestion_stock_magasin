@@ -13,7 +13,7 @@ $username = $input['username'] ?? '';
 $password = $input['password'] ?? '';
 
 if (empty($username) || empty($password)) {
-    http_response_code(401);
+    http_response_code(401);  // Unauthorized
     echo json_encode(['status' => false, 'message' => 'Champs manquants']);
     exit;
 }
@@ -29,7 +29,7 @@ if ($user && password_verify($password, $user['password'])) {
     $_SESSION['role'] = $user['role'];
     echo json_encode(['status' => true]);
 } else {
-    http_response_code(401);
+    http_response_code(400); //
     echo json_encode(['status' => false, 'message' => 'Identifiants incorrects']);
 }
 ?>

@@ -17,14 +17,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$method = $_SERVER['REQUEST_METHOD'];
+$method = $_SERVER['REQUEST_METHOD']; 
 
 switch ($method) {
     case 'GET':
         // Paramètres de recherche et filtrage
-        $search = $_GET['search'] ?? '';
+        $search = $_GET['search'] ?? ''; 
         $category = $_GET['category'] ?? '';
         $sort = $_GET['sort'] ?? 'name';
+        $id = $_GET['id'] ?? '';
         $order = $_GET['order'] ?? 'ASC';
 
         // Construction de la requête
@@ -43,6 +44,10 @@ switch ($method) {
         if (!empty($category)) {
             $query .= " AND p.category_id = ?";
             $params[] = $category;
+        }
+        if (!empty($id)) {
+            $query .= " AND p.category_id = ?";
+            $params[] = $id;
         }
 
         $query .= " ORDER BY $sort $order";

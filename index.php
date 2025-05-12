@@ -26,50 +26,8 @@ $stmt = $conn->query("
     LIMIT 5
 ");
 $recent_movements = $stmt->fetchAll();
+require_once "assets/header.php";
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de bord - Gestion de Stock</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">Gestion de Stock</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="index.php">Tableau de bord</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="products/index.php">Produits</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="categories/index.php">Catégories</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="movements/index.php">Mouvements</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <span class="nav-link">Bienvenue, <?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                    </li>
-                    <li class="nav-item">
-                        <button id="logoutBtn" class="nav-link btn btn-link">Déconnexion</button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
     <div class="container mt-4">
         <h2>Tableau de bord</h2>
         
@@ -149,21 +107,6 @@ $recent_movements = $stmt->fetchAll();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/api.js"></script>
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', async function() {
-            try {
-                const response = await AuthService.logout();
-                if (response.status) {
-                    // Redirect to login page on successful logout
-                    window.location.href = 'auth/login.php';
-                } else {
-                    alert('Erreur lors de la déconnexion: ' + response.message);
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la déconnexion');
-            }
-        });
-    </script>
+    <script src="assets/deconexion.js"></script>
 </body>
 </html>

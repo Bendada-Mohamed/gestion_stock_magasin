@@ -16,24 +16,24 @@ async function loadProducts(filters = {}) {
     products.forEach(product => {
       const row = document.createElement('tr');
       row.innerHTML = `
-                        <td>${product.name}</td>
-                        <td>${product.description}</td>
-                        <td>${product.category_name || 'Non catégorisé'}</td>
-                        <td>${parseFloat(product.price).toFixed(2)} €</td>
-                        <td>
-                            <span class="badge bg-${product.quantity < 10 ? 'danger' : 'success'}">
-                                ${product.quantity}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="edit.php?id=${product.id}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    `;
+        <td>${product.name}</td>
+        <td>${product.description}</td>
+        <td>${product.category_name || 'Non catégorisé'}</td>
+        <td>${parseFloat(product.price).toFixed(2)} €</td>
+        <td>
+            <span class="badge bg-${product.quantity < 10 ? 'danger' : 'success'}">
+                ${product.quantity}
+            </span>
+        </td>
+        <td>
+            <a href="edit.php?id=${product.id}" class="btn btn-sm btn-primary">
+                <i class="bi bi-pencil"></i>
+            </a>
+            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
       tableBody.appendChild(row);
     });
   } catch (error) {

@@ -1,56 +1,9 @@
 <?php
 session_start();
 require_once '../config/database.php';
-
-// Vérification de l'authentification
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../auth/login.php');
-    exit();
-}
-
-// Filtres
-$type = $_GET['type'] ?? '';
-$product_id = $_GET['product_id'] ?? '';
-$date_start = $_GET['date_start'] ?? '';
-$date_end = $_GET['date_end'] ?? '';
-
-// Construction de la requête
-$query = "SELECT sm.*, p.name as product_name, u.username 
-          FROM stock_movements sm 
-          JOIN products p ON sm.product_id = p.id 
-          JOIN users u ON sm.user_id = u.id 
-          WHERE 1=1";
-$params = [];
-
-if (!empty($type)) {
-    $query .= " AND sm.type = ?";
-    $params[] = $type;
-}
-
-if (!empty($product_id)) {
-    $query .= " AND sm.product_id = ?";
-    $params[] = $product_id;
-}
-
-if (!empty($date_start)) {
-    $query .= " AND DATE(sm.date_mouvement) >= ?";
-    $params[] = $date_start;
-}
-
-if (!empty($date_end)) {
-    $query .= " AND DATE(sm.date_mouvement) <= ?";
-    $params[] = $date_end;
-}
-
-$query .= " ORDER BY sm.date_mouvement DESC";
-
-$stmt = $conn->prepare($query);
-$stmt->execute($params);
-$movements = $stmt->fetchAll();
-
-// Récupération des produits pour le filtre
-$products = $conn->query("SELECT * FROM products ORDER BY name")->fetchAll();
 require_once "../assets/header.php";
+// Récupération des produits pour le filtre
+    $products = $conn->query("SELECT * FROM products ORDER BY name")->fetchAll();
 ?>
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -63,12 +16,12 @@ require_once "../assets/header.php";
         <!-- Filtres -->
         <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" class="row g-3">
+                <form id="filterForm" class="row g-3">
                     <div class="col-md-3">
                         <select class="form-select" name="type">
                             <option value="">Tous les types</option>
-                            <option value="entree" <?php echo $type === 'entree' ? 'selected' : ''; ?>>Entrée</option>
-                            <option value="sortie" <?php echo $type === 'sortie' ? 'selected' : ''; ?>>Sortie</option>
+                            <option value="entree">Entrée</option>
+                            <option value="sortie">Sortie</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -98,40 +51,18 @@ require_once "../assets/header.php";
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Produit</th>
-                                <th>Type</th>
-                                <th>Quantité</th>
-                                <th>Utilisateur</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($movements as $movement): ?>
-                            <tr>
-                                <td><?php echo date('d/m/Y H:i', strtotime($movement['date_mouvement'])); ?></td>
-                                <td><?php echo htmlspecialchars($movement['product_name']); ?></td>
-                                <td>
-                                    <span class="badge bg-<?php echo $movement['type'] === 'entree' ? 'success' : 'danger'; ?>">
-                                        <?php echo $movement['type'] === 'entree' ? 'Entrée' : 'Sortie'; ?>
-                                    </span>
-                                </td>
-                                <td><?php echo $movement['quantity']; ?></td>
-                                <td><?php echo htmlspecialchars($movement['username']); ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                    <tbody id="MovementsTableBody"></tbody>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="../assets/js/api.js"></script>
     <script src="../assets/deconexion.js"></script>
+    <script src="../assets/movements.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     
 </body>
 </html> 

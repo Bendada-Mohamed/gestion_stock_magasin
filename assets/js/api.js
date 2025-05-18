@@ -20,7 +20,7 @@ const AuthService = {
             return { status: false, message: 'Erreur de connexion au serveur' };
         }
     },
-    
+
     async logout() {
         try {
             const response = await fetch(`${API_URL}/auth/logout.php`, {
@@ -37,19 +37,33 @@ const AuthService = {
         }
     }
 }
+// Service pour les mouvements
+
+const MovementService = {
+    async getMovements(filters = {}) {
+        try {
+            const queryParams = new URLSearchParams(filters).toString();
+            const response = await fetch(`${API_URL}/movements/?${queryParams}`);
+            if (!response.ok) throw new Error('Error réseau');
+            return await response.json();
+        } catch (error) {
+            console.error('Erreur lors de la récupération des mouvements:', error);
+            throw error;
+        }
+    }
+}
 
 // Service pour les categories
-    // code ...
+// code ...
 
 
-// Service pour les mouvements
-    // code ...
+
 
 
 // Service pour les produits
 const ProductService = {
     // Récupérer tous les produits avec filtres
-    async getProducts(filters = {}) { 
+    async getProducts(filters = {}) {
         try {
             const queryParams = new URLSearchParams(filters).toString();
             const response = await fetch(`${API_URL}/products/?${queryParams}`); // GET

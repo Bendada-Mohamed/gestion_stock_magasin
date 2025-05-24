@@ -27,47 +27,6 @@ if (!$product) {
 // Récupération des catégories
 $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetchAll();
 
-// Traitement du formulaire
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'] ?? '';
-    $description = $_POST['description'] ?? '';
-    $price = $_POST['price'] ?? 0;
-    $quantity = $_POST['quantity'] ?? 0;
-    $category_id = $_POST['category_id'] ?: null;
-
-    $errors = [];
-
-    // Validation
-    if (empty($name)) {
-        $errors[] = "Le nom du produit est requis";
-    }
-    if ($price <= 0) {
-        $errors[] = "Le prix doit être supérieur à 0";
-    }
-    if ($quantity < 0) {
-        $errors[] = "La quantité ne peut pas être négative";
-    }
-
-    if (empty($errors)) {
-        try {
-            $stmt = $conn->prepare("UPDATE products SET name = ?, description = ?, price = ?, quantity = ?, category_id = ? WHERE id = ?");
-            $stmt->execute([$name, $description, $price, $quantity, $category_id, $id]);
-
-            // Si la quantité a changé, enregistrer le mouvement
-            if ($quantity != $product['quantity']) {
-                $diff = $quantity - $product['quantity'];
-                $type = $diff > 0 ? 'entree' : 'sortie';
-                $stmt = $conn->prepare("INSERT INTO stock_movements (product_id, type, quantity, user_id) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$id, $type, abs($diff), $_SESSION['user_id']]);
-            }
-
-            header('Location: index.php');
-            exit();
-        } catch (PDOException $e) {
-            $errors[] = "Erreur lors de la modification du produit : " . $e->getMessage();
-        }
-    }
-}
 require_once "../assets/header.php";
 ?>
     <div class="container mt-4">
@@ -88,7 +47,8 @@ require_once "../assets/header.php";
                             </div>
                         <?php endif; ?>
 
-                        <form method="POST" action="">
+                        <form id="edit-form">
+                            <input type="number" id="product_id" hidden value="<?php echo $id ?>">
                             <div class="mb-3">
                                 <label for="name" class="form-label">Nom du produit</label>
                                 <input type="text" class="form-control" id="name" name="name" required 
@@ -118,7 +78,7 @@ require_once "../assets/header.php";
                                 <div class="input-group">
                                     <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required
                                            value="<?php echo htmlspecialchars($_POST['price'] ?? $product['price']); ?>">
-                                    <span class="input-group-text">€</span>
+                                    <span class="input-group-text">MAD</span>
                                 </div>
                             </div>
 
@@ -141,6 +101,10 @@ require_once "../assets/header.php";
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/api.js"></script>
+    <script src="../assets/products.js"></script>
     <script src="../assets/deconexion.js"></script>
+    <script>
+        editProducts()
+    </script>
 </body>
 </html> 

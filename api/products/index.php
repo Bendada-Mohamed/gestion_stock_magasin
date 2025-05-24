@@ -84,18 +84,17 @@ switch ($method) {
         
         $stmt = $conn->prepare("UPDATE products SET name = ?, description = ?, quantity = ?, price = ?, category_id = ? WHERE id = ?");
         $result = $stmt->execute([
-            $data['name'],
+            $data['nomProduit'],
             $data['description'],
-            $data['quantity'],
-            $data['price'],
-            $data['category_id'] ?? null,
-            $data['id']
+            $data['quantite'],
+            $data['prix'],
+            $data['categorieId'] ?? null,
+            $data['productId']
         ]);
 
         if ($result) {
             echo json_encode(['status' => 'success', 'message' => 'Produit mis à jour avec succès']);
         } else {
-            http_response_code(500);
             echo json_encode(['status' => 'error', 'message' => 'Erreur lors de la mise à jour du produit']);
         }
         break;

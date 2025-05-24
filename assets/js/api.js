@@ -113,14 +113,14 @@ const ProductService = {
     },
 
     // Mettre à jour un produit
-    async updateProduct(id, productData) {
+    async updateProduct(productData) {
         try {
             const response = await fetch(`${API_URL}/products/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...productData, id })
+                body: JSON.stringify(productData)
             });
             if (!response.ok) throw new Error('Erreur réseau');
             return await response.json();

@@ -1,11 +1,5 @@
-// Charger les produits au chargement de la page
-document.addEventListener('DOMContentLoaded', () => {
-  loadProducts();
-  setupFilterForm();
-});
 
 // Fonction pour charger les produits
-
 async function loadProducts(filters = {}) {
   try {
     const response = await ProductService.getProducts(filters);
@@ -19,7 +13,7 @@ async function loadProducts(filters = {}) {
         <td>${product.name}</td>
         <td>${product.description}</td>
         <td>${product.category_name || 'Non catégorisé'}</td>
-        <td>${parseFloat(product.price).toFixed(2)} €</td>
+        <td>${parseFloat(product.price).toFixed(2)} MAD</td>
         <td>
             <span class="badge bg-${product.quantity < 10 ? 'danger' : 'success'}">
                 ${product.quantity}
@@ -69,4 +63,27 @@ async function deleteProduct(parametre) {
       alert('Erreur lors de la suppression du produit');
     }
   }
+}
+
+function editProducts() {
+  const form = document.getElementById('edit-form');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const productId = document.getElementById('product_id').value;
+    const nomProduit = document.getElementById('name').value;
+    const description = document.getElementById('description').value;
+    const categorieId = document.getElementById('category_id').value;
+    const prix = document.getElementById('price').value;
+    const quantite = document.getElementById('quantity').value;
+    const produit = { nomProduit, description, categorieId, prix, quantite, productId };
+    const response = await ProductService.updateProduct(produit);
+    if (response.status === "success") {
+      alert(response.message)
+      setTimeout(() => {
+        window.location.href = "http://localhost/gestion_stock_magasin/products/index.php";
+      }, 1500);
+    } else if (response.status === "error") {
+      alert(response.message);
+    }
+  })
 }

@@ -78,5 +78,12 @@ require "../assets/header.php";
     <script src="../assets/deconexion.js"></script>
     <script src="../assets/products.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Charger les produits au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            setupFilterForm();
+        });
+    </script>
 </body>
 </html> 

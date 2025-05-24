@@ -61,6 +61,55 @@ switch($method){
 
     echo json_encode(['status' => 'success', 'data' => $movements]);
     break;
+  case 'POST':
+    $product_id = $_POST['product_id'] ?? '';
+    $type = $_POST['type'] ?? '';
+    $quantity = $_POST['quantity'] ?? 0;
+
+    $errors = [];
+
+    // Validation
+    if (empty($product_id)) {
+      $errors[] = "Le produit est requis";
+    }
+    if (empty($type)) {
+      $errors[] = "Le type de mouvement est requis";
+    }
+    if ($quantity <= 0) {
+      $errors[] = "La quantité doit être supérieure à 0";
+    }
+
+    if (empty($errors)) {
+      try {
+        // Vérifier le stock disponible pour les sorties
+        if ($type === 'sortie') {
+          $stmt = $conn->prepare("SELECT quantity FROM products WHERE id = ?");
+          $stmt->execute([$product_id]);
+          $current_stock = $stmt->fetchColumn();
+
+          if ($current_stock < $quantity) {
+            $errors[] = "Stock insuffisant. Stock disponible : " . $current_stock;
+          }
+        }
+
+        if (empty($errors)) {
+          // Enregistrer le mouvement
+          $stmt = $conn->prepare("INSERT INTO stock_movements (product_id, type, quantity, user_id) VALUES (?, ?, ?, ?)");
+          $stmt->execute([$product_id, $type, $quantity, $_SESSION['user_id']]);
+
+          // Mettre à jour le stock
+          $stmt = $conn->prepare("UPDATE products SET quantity = quantity + ? WHERE id = ?");
+          $quantity_update = $type === 'entree' ? $quantity : -$quantity;
+          $stmt->execute([$quantity_update, $product_id]);
+
+          header('Location: index.php');
+          exit();
+        }
+      } catch (PDOException $e) {
+        $errors[] = "Erreur lors de l'enregistrement du mouvement : " . $e->getMessage();
+      }
+    }
+    break;
   default:
     http_response_code(405);
     echo json_encode(['status' => 'error', 'message' => 'Méthode non autorisée']);

@@ -28,17 +28,17 @@ require_once "../assets/header.php";
                         <select class="form-select" name="product_id">
                             <option value="">Tous les produits</option>
                             <?php foreach ($products as $product): ?>
-                            <option value="<?php echo $product['id']; ?>" <?php echo $product_id == $product['id'] ? 'selected' : ''; ?>>
+                            <option value="<?php echo $product['id']; ?>">
                                 <?php echo htmlspecialchars($product['name']); ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <input type="date" class="form-control" name="date_start" placeholder="Date début" value="<?php echo $date_start; ?>">
+                        <input type="date" class="form-control" name="date_start" placeholder="Date début">
                     </div>
                     <div class="col-md-2">
-                        <input type="date" class="form-control" name="date_end" placeholder="Date fin" value="<?php echo $date_end; ?>">
+                        <input type="date" class="form-control" name="date_end" placeholder="Date fin">
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Filtrer</button>
@@ -50,8 +50,18 @@ require_once "../assets/header.php";
         <!-- Liste des mouvements -->
         <div class="card">
             <div class="card-body">
-                <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                        <th>Date</th>
+                        <th>Produit</th>
+                        <th>Type</th>
+                        <th>Quantité</th>
+                        <th>Utilisateur</th>
+                        </tr>
+                    </thead>
                     <tbody id="MovementsTableBody"></tbody>
+                </table>
                 </div>
             </div>
         </div>

@@ -18,15 +18,14 @@ session_start();
                         <h3 class="text-center">Connexion</h3>
                     </div>
                     <div class="card-body">
-                            <!-- <div class="alert alert-danger"></div> -->
                         <form id="connectForm">
                             <div class="mb-3">
                                 <label for="username" class="form-label">Nom d'utilisateur</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
+                                <input type="text" class="form-control" id="username" name="username">
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Mot de passe</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
+                                <input type="password" class="form-control" id="password" name="password">
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary">Se connecter</button>

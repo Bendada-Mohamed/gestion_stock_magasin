@@ -11,10 +11,6 @@ if (!isset($_SESSION['user_id'])) {
 // Récupération des produits
 $products = $conn->query("SELECT * FROM products ORDER BY name")->fetchAll();
 
-// Traitement du formulaire
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-}
 require_once "../assets/header.php";
 ?>
     <div class="container mt-4">

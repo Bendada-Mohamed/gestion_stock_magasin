@@ -13,11 +13,18 @@ const AuthService = {
                 },
                 body: JSON.stringify(data)
             });
-            if (!response.ok) throw new Error('Erreur reseau');
-            return await response.json();
+            
+            const result = await response.json();
+            if (!response.ok) {
+                return {
+                    status: false,
+                    message: result.message || 'Erreur inconnue côté serveur'
+                };
+            }
+            return result;
         } catch (error) {
             console.error('Erreur lors de la Connexion:', error);
-            return { status: false, message: 'Erreur de connexion au serveur' };
+            return { status: false, message: 'Erreur de connexion au serveur. Veuillez réessayer plus tard.' };
         }
     },
 
